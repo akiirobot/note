@@ -42,26 +42,26 @@ def entrypoint(request):
     return return_value
 
 @app.route("/", methods=["GET"])
-def home():
-    tz_string = str(datetime.now())
-
-    return "<h1>" + tz_string + "</h1>" + \
-    """
-    <form>
-    <label for="timestamp">Timestamp:</label><br>
-    <input type="text" id="timestamp" name="timestamp"><br>
-    <input type="submit" value="Submit">
-    </form>
-    """, 200
-
-    return "<h1>" + tz_string + "</h1>", 200
-
-@app.route("/notes", methods=["GET"])
 def notes():
     return """
-    <form action="/notes" method="post">
-    <label for="key">Key:</label><br>
-    <input type="text" id="key" name="key"><br>
+    <script>
+        var formSubmitting = false;
+        var setFormSubmitting = function() { formSubmitting = true; };
+        window.onload = function() {
+            window.addEventListener("beforeunload", function (e) {
+                if (formSubmitting) {
+                    return undefined;
+                }
+
+                var confirmationMessage = 'It looks like you have been editing something. '
+                                        + 'If you leave before saving, your changes will be lost.';
+                
+                (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+                return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+            });
+        };
+    </script>
+    <form action="/notes" method="post" onsubmit="setFormSubmitting()">
     <label for="title">Title:</label><br>
     <input type="text" id="title" name="title"><br>
     <label for="text">Text:</label><br>
@@ -73,7 +73,13 @@ def notes():
 def check_collision(key):
     doc_ref = db.collection(u'note').document(key)
     doc = doc_ref.get()
+    if doc.exists:
+        doc_ref.delete()
     return doc.exists
+
+def random_key(length):
+   letters = "0123456789abcdefghjkmnopqrstuvwxyzABCDEFGHJKMNOPQRSTUVWXYZ"
+   return ''.join(random.choice(letters) for i in range(length))
 
 @app.route("/notes/<string:key>", methods=["GET"])
 def get_note(key):
@@ -81,7 +87,6 @@ def get_note(key):
 
     doc = doc_ref.get()
     if doc.exists:
-        print(f'Document data: {doc.to_dict()}')
         obj = doc.to_dict()
 
         return """
@@ -95,31 +100,21 @@ def get_note(key):
 @app.route("/notes", methods=["POST"])
 def create_note():
 
-    print("POST")
-    print(request.form.get('title', default="bbb"))
-
-    key = request.form.get('key', default="", type = str)
     title = request.form.get('title', default="", type = str)
     text = request.form.get('text', default="", type = str)
 
-    if key:
-        if check_collision(key):
-            return "Key Exists", 400
-    else: # not key
-        key = id_generator(6)
-        while check_collision(key):
-            key = id_generator(6)
-
-    time = get_current_time()
+    key = random_key(3)
+    while check_collision(key):
+        key = random_key(3)
 
     doc_ref = db.collection(u'note').document(key)
 
     doc_ref.set({
-        u'Timestamp': time,
+        u'Timestamp': get_current_time(),
         u'Key': key,
         u'Title': title,
         u'Text': text,
     })
 
-    return "OK", 200
+    return "OK "+key, 200
 
