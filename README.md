@@ -20,11 +20,26 @@ gcloud services enable run.googleapis.com
 export GOOGLE_APPLICATION_CREDENTIALS="path/to/xxxxxx-xxxxxx-xxxxxxxxxxxx.json"
 ```
 
+Create firestore
+
+```shell
+gcloud alpha firestore databases create \
+--database=note \
+--location=asia-east1 \
+--type=firestore-native
+```
+
 ## Debug
 
 ```shell
-cd function/note
-functions-framework --target entrypoint --debug
+python -m venv venv
+source venv/bin/activate
+pip install functions-framework
+pip install -r function/note/requirements.txt
+```
+
+```shell
+./debug.sh
 ```
 
 ## Deploy

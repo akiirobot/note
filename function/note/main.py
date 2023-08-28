@@ -14,7 +14,7 @@ import functions_framework
 import jsonpickle
 
 if __debug__:
-    project_id = "note-376412"
+    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
 else:
     project_id = os.environ['GCP_PROJECT']
 
@@ -62,10 +62,8 @@ def notes():
         };
     </script>
     <form action="/notes" method="post" onsubmit="setFormSubmitting()">
-    <label for="title">Title:</label><br>
-    <input type="text" id="title" name="title"><br>
     <label for="text">Text:</label><br>
-    <textarea name="text" rows="30" cols="120"></textarea>
+    <textarea name="text" rows="30" cols="120" required></textarea>
     <input type="submit" value="Submit">
     </form>
     """, 200
@@ -90,9 +88,8 @@ def get_note(key):
         obj = doc.to_dict()
 
         return """
-        <h1>{}</h1><br>
         <pre>{}</pre>
-        """.format(obj['Title'], obj['Text']), 200
+        """.format(obj['Text']), 200
     else:
         return "404", 404
 
@@ -100,8 +97,10 @@ def get_note(key):
 @app.route("/notes", methods=["POST"])
 def create_note():
 
-    title = request.form.get('title', default="", type = str)
     text = request.form.get('text', default="", type = str)
+
+    if not text.strip():
+        return "not text", 400
 
     key = random_key(3)
     while check_collision(key):
@@ -110,9 +109,8 @@ def create_note():
     doc_ref = db.collection(u'note').document(key)
 
     doc_ref.set({
-        u'Timestamp': get_current_time(),
+        u'Timestamp': firestore.SERVER_TIMESTAMP,  # datetime.datetime.now()
         u'Key': key,
-        u'Title': title,
         u'Text': text,
     })
 
