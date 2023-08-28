@@ -4,7 +4,7 @@
 
 pushd function/note
 
-gcloud functions deploy note \
+gcloud functions deploy notes \
 --gen2 \
 --runtime=python310 \
 --region=asia-east1 \

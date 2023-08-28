@@ -76,7 +76,7 @@ def random_key(length):
    letters = "0123456789abcdefghjkmnopqrstuvwxyzABCDEFGHJKMNOPQRSTUVWXYZ"
    return ''.join(random.choice(letters) for i in range(length))
 
-@app.route("/notes/<string:key>", methods=["GET"])
+@app.route("/<string:key>", methods=["GET"])
 def get_note(key):
     doc_ref = db.collection(u'note').document(key)
 
@@ -88,7 +88,7 @@ def get_note(key):
         return "404", 404
 
 
-@app.route("/notes", methods=["POST"])
+@app.route("/", methods=["POST"])
 def create_note():
     text = request.form.get('text', default="", type = str)
 
