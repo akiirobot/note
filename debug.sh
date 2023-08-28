@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd function/note
-functions-framework --target entrypoint --debug
+GCP_PROJECT="$GOOGLE_CLOUD_PROJECT" functions-framework --target entrypoint --debug

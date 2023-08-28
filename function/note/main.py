@@ -13,10 +13,7 @@ from google.cloud import firestore
 import functions_framework
 import jsonpickle
 
-if __debug__:
-    project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-else:
-    project_id = os.environ['GCP_PROJECT']
+project_id = os.environ['GCP_PROJECT']
 
 app = Flask(__name__)
 db = firestore.Client(project=project_id)
