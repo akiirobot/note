@@ -1,5 +1,7 @@
 #!/bin/bash
 
+: ${GOOGLE_CLOUD_PROJECT?: GOOGLE_CLOUD_PROJECT project id is not provided}
+
 pushd function/note
 
 gcloud functions deploy note \
@@ -9,7 +11,8 @@ gcloud functions deploy note \
 --source=. \
 --entry-point=entrypoint \
 --trigger-http \
---allow-unauthenticated
+--allow-unauthenticated \
+--set-env-vars GCP_PROJECT=$GOOGLE_CLOUD_PROJECT
 
 popd
 

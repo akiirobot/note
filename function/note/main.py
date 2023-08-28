@@ -83,17 +83,13 @@ def get_note(key):
     doc = doc_ref.get()
     if doc.exists:
         obj = doc.to_dict()
-
-        return """
-        <pre>{}</pre>
-        """.format(obj['Text']), 200
+        return "<pre>{}</pre>".format(obj['Text']), 200
     else:
         return "404", 404
 
 
 @app.route("/notes", methods=["POST"])
 def create_note():
-
     text = request.form.get('text', default="", type = str)
 
     if not text.strip():
